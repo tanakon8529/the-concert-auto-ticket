@@ -1,0 +1,15 @@
+# env
+python-dotenv==0.19.2
+
+# log
+loguru==0.6.0
+
+# auto http method
+requests==2.27.1
+beautifulsoup4==4.11.1
+
+# auto click and keyborad
+torch==1.11.0
+PyAutoGUI==0.9.53
+Pillow==9.1.0
+opencv-python==4.5.5.64

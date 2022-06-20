@@ -1,0 +1,9 @@
+# caches, log, setting
+.env
+log
+log_error
+*/__pycache__
+*__pycache__
+
+# unit test
+test.py
