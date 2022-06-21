@@ -1,9 +1,10 @@
 from loguru import logger
-from bs4 import BeautifulSoup
+from time import time
 
 import urllib.request
+import subprocess
 import pyautogui
-import time
+import pyperclip
 import os
 
 class auto_click_controls(object):
@@ -14,20 +15,42 @@ class auto_click_controls(object):
         self.real_path_resource = os.path.realpath(path_resource) 
         if not os.path.exists(self.real_path_resource):
             os.makedirs(self.real_path_resource)
-        self.html_parser = 'html.parser'
 
-    def once_click_button(self, url_page, path_pic):
+    def get_current_url(self):
+        current_url = urllib.urlopen("http://www.stackoverflow.com").getcode()
+        return current_url
+
+    def once_click_button(self, path_pic):
+        status_click_button = False
         try:
-            button_join = pyautogui.locateOnScreen(self.real_path_resource+'/'+path_pic  , confidence=0.7)
-            if button_join:
-                pyautogui.click(button_join)
-                logger.error("{}".format(e))
+            start = time() + 5
+            while time() < start:
+                button_join = pyautogui.locateOnScreen(self.real_path_resource+'/'+path_pic  , confidence=0.7)
+                if button_join:
+                    pyautogui.click(button_join)
+                    status_click_button = True
+                    logger.debug("click button : {}".format(status_click_button))
+                    break
+
+            return status_click_button
         except Exception as e:
             logger.error("{}".format(e)) 
 
-    def click_price_stage(self, html_url):
+    def ctrl_c(self):
+        text_cilpboard = None
+        pyautogui.hotkey('ctrl', 'c')
         try:
-            soup = BeautifulSoup(html_url, self.html_parser)
-            ele_stage_body = soup.findAll("div", class_="stage-body")
-        except Exception as e:
-            logger.error("{}".format(e))
+            # clipboard windows
+            text_cilpboard = pyperclip.paste()
+        except Exception as e1:
+            try:
+                # clipboard linux
+                p = subprocess.Popen(['xclip','-selection', 'clipboard', '-o'], stdout=subprocess.PIPE)
+                retcode = p.wait()
+                text_cilpboard = p.stdout.read()
+            except Exception as e2:
+                logger.error("{} - {}".format(e1, e2)) 
+        return text_cilpboard
+
+    def ctrl_v(self, path_pic):
+        pyautogui.hotkey('ctrl', 'v')
