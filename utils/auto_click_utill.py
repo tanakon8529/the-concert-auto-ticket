@@ -1,5 +1,6 @@
 from loguru import logger
 from time import time
+from sys import platform
 
 import urllib.request
 import subprocess
@@ -20,41 +21,71 @@ class auto_click_controls(object):
         current_url = urllib.urlopen("http://www.stackoverflow.com").getcode()
         return current_url
 
+    def check_platform(self, path_folder_full, path_input):
+        real_path = path_folder_full
+        if path_folder_full == None:
+            real_path = self.real_path_resource
+
+        if platform == "linux" or platform == "linux2":
+            # linux
+            path_folder_full = real_path+'/'+path_input
+        elif platform == "darwin":
+            # OS X
+            path_folder_full = real_path+'/'+path_input
+        elif platform == "win32":
+            # Windows..
+            path_folder_full = real_path+'\\'+path_input
+
+        return path_folder_full
+
     def once_click_button(self, path_pic):
         status_click_button = False
+        path_folder_full = None
         try:
-            start = time() + 1
-            count_round = 0
+            start = time() + 5
             while time() < start:
-                button_join = pyautogui.locateOnScreen(self.real_path_resource+'/'+path_pic  , confidence=0.7)
+                pic_path_folder_full = self.check_platform(path_folder_full, path_pic)
+                button_join = pyautogui.locateOnScreen(pic_path_folder_full  , confidence=0.7)
+
                 if button_join:
                     pyautogui.click(button_join)
                     status_click_button = True
                     logger.debug("click button : {}".format(status_click_button))
                     break
-                
-                count_round += 1
-                logger.debug("count click button : {}".format(count_round))
 
             return status_click_button
         except Exception as e:
             logger.error("{}".format(e)) 
 
-    def once_click_button_05(self, path_pic):
+    def once_click_seat_button_05(self, total_tickets, folder_pic_seat_button, pic_seat_success):
         status_click_button = False
+        path_folder_full = None
         try:
-            start = time() + 1
-            count_round = 0
+            start = time() + 10
             while time() < start:
-                button_join = pyautogui.locateOnScreen(self.real_path_resource+'/'+path_pic  , confidence=0.4)
-                if button_join:
-                    pyautogui.click(button_join)
-                    status_click_button = True
-                    logger.debug("click button : {}".format(status_click_button))
+                real_path_folder_full = self.check_platform(path_folder_full, folder_pic_seat_button)
+
+                for path_pic in os.listdir(real_path_folder_full):
+                    if path_pic.endswith(".png"):
+                        pic_path_folder_full = self.check_platform(real_path_folder_full, path_pic)
+
+                    button_join_location = pyautogui.locateOnScreen(pic_path_folder_full  , confidence=0.8)
+                    logger.debug("search seat : {}".format(path_pic))
+
+                    if button_join_location:
+                        for press_time in range(total_tickets):
+                            logger.debug("press {} : total {}".format(press_time, total_tickets))
+                            button_join_point = pyautogui.center(button_join_location)
+                            button_join_point_x, button_join_point_y = button_join_point
+                            pyautogui.click(button_join_point_x+press_time, button_join_point_y)
+                            status_click_button = True
+
+                    logger.debug("click seat : {}".format(status_click_button))
+
+                    if status_click_button == True:
+                        break
+                if status_click_button == True:
                     break
-                
-                count_round += 1
-                logger.debug("count click button : {}".format(count_round))
 
             return status_click_button
         except Exception as e:
@@ -87,3 +118,15 @@ class auto_click_controls(object):
         for scroll_scale in range(5):
             pyautogui.scroll(-1)
 
+    def check_seat_success(self, pic_seat_success):
+        status_text_pic_seat_success = False
+        path_folder_full = None
+        try:
+            pic_path_folder_full = self.check_platform(path_folder_full, pic_seat_success)
+            text_pic_seat_success = pyautogui.locateOnScreen(pic_path_folder_full  , confidence=0.7)
+            if text_pic_seat_success:
+                status_text_pic_seat_success = True
+
+            return status_text_pic_seat_success
+        except Exception as e:
+            logger.error("{}".format(e)) 
